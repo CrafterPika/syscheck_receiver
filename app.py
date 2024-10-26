@@ -175,6 +175,8 @@ if __name__ == "__main__":
 
     if config["docker"]:
         print("Docker is TRUE")
+        if not os.path.isdir(report_dir):
+            os.mkdir(report_dir)
 
     # start server
     if args.debug == "1":
