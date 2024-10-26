@@ -158,7 +158,7 @@ def errorhandler(e):
 if __name__ == "__main__":
     from waitress import serve
 
-    print("syscheck_receiver v1.0.3")
+    print(f"syscheck_receiver v{config['version']}")
 
     # check if sqlite db exist if not make one
     if not os.path.isfile(db_dir):
