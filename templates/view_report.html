@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en_US">
+    <head>
+        <title>SysCheck Report: {{ report_id }}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='main.css') }}"/>
+    </head>
+    <body>
+
+            <pre>
+{{ report_content }}
+            </pre>
+            <br>
+            <br>
+            <center>
+                <p>SysCheck server written by CrafterPika! <a href='https://git.crafterpika.cc/CrafterPika/syscheck_reciever' target='_blank'>Source Code</a></p>
+            </center>
+    </body>
+</html>

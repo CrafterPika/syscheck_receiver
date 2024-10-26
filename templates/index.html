@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en_US">
+    <head>
+        <title>SysCheck: Index</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="UTF-8">
+        <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='main.css') }}"/>
+    </head>
+    <body>
+            <div class="topnav">
+                <a href="/syscheck2">Download sysCheck2 (Wii Mini)</a>
+            </div>
+            <center>
+                <h1>Last 15 SysCheck Uploads:</h1>
+                <div class="content">
+                    {{ uploadIndex|safe }}
+                </div>
+                <p>There are currently {{ report_count }} SysCheck(s) on this server.</p>
+                <br>
+                <p>or....</p>
+                <br>
+                <p>Enter you're SysCheck report ID here: <input type="text" id="report_id" placeholder="example">  <button type="button" id="submit-btn">Submit</button></p>
+                <br>
+                <br>
+                SysCheck server written by CrafterPika! <a href='https://git.crafterpika.cc/CrafterPika/syscheck_reciever' target='_blank'>Source Code</a>
+            </center>
+            <script src="{{ url_for('static', filename='main.js') }}"></script>
+    </body>
+</html>

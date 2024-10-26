@@ -1,0 +1,11 @@
+{
+    "ip": "0.0.0.0",
+    "domain": "syscheck.crafterpika.cc",
+    "port": "6969",
+    "upload_passwords": [
+        "d2wRuTEObSAN",
+        "B277eNGp789a"
+    ],
+    "replace_str": "http://syscheck.crafterpika.cc/syscheck_send.php",
+    "docker": false
+}
