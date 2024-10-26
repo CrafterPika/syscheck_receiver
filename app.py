@@ -56,7 +56,7 @@ def index():
     uploadIndex=""
     for upload in uploads:
         upload_time = datetime.fromtimestamp(upload[1])
-        uploadIndex+="ID: <a href='http://{}/view_report?id={}' target='_blank'>{}</a> --  Uploaded at {}!<br>".format(config["domain"], upload[0], upload[0], upload_time)
+        uploadIndex+="ID: <a href='/view_report?id={}' target='_blank'>{}</a> --  Uploaded at {}!<br>".format(upload[0], upload[0], upload_time)
 
     return render_template("index.html", uploadIndex=uploadIndex, report_count=report_count[0][0]), 200
 
