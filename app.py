@@ -84,7 +84,8 @@ def syscheck_report():
             db.close()
 
             return f"Success! Report ID: {report_id}", 200
-        except:
+        except Exception as ex:
+            print(ex)
             return "ERROR: Failed to save SysCheck report!", 200
         
     else:
