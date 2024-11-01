@@ -61,7 +61,7 @@ def index():
     return render_template("index.html", uploadIndex=uploadIndex, report_count=report_count[0][0], svr_ver=config["version"]), 200
 
 @app.route("/syscheck_up.php", methods=["POST"]) # SysCheckME-dev
-@app.route("/syscheck_receiver.php", methods=["POST"]) # literally anything else
+@app.route("/syscheck_receiver.php", methods=["POST"]) # literally anything else (DNS?)
 def syscheck_report():
     form_data = request.form.to_dict(flat=False)
     report_txt = form_data["syscheck"][0]
@@ -102,9 +102,9 @@ def view_report():
 @app.route("/syscheck_dl", methods=["GET"])
 def syscheck():
     if len("http://syscheck.rc24.xyz/syscheck_receiver.php") < len(config["replace_str"]):
-        return "Replacement host has to be exactly 48 characters; Specified URL is too long!", 400
+        return "Replacement host has to be exactly 46 characters; Specified URL is too long!", 400
     elif len("http://syscheck.rc24.xyz/syscheck_receiver.php") > len(config["replace_str"]):
-        return "Replacement host has to be exactly 48 characters; Specified URL is too short!", 400
+        return "Replacement host has to be exactly 46 characters; Specified URL is too short!", 400
 
     dol = BytesIO()
     zip = BytesIO()
