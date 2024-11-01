@@ -58,9 +58,9 @@ def index():
         upload_time = datetime.fromtimestamp(upload[1])
         uploadIndex+="ID: <a href='/view_report?id={}' target='_blank'>{}</a> --  Uploaded at {}!<br>".format(upload[0], upload[0], upload_time)
 
-    return render_template("index.html", uploadIndex=uploadIndex, report_count=report_count[0][0]), 200
+    return render_template("index.html", uploadIndex=uploadIndex, report_count=report_count[0][0], svr_ver=config["version"]), 200
 
-@app.route("/syscheck_send.php", methods=["POST"]) # SysCheck2.1.0b.19
+@app.route("/syscheck_up.php", methods=["POST"]) # SysCheckME-dev
 @app.route("/syscheck_receiver.php", methods=["POST"]) # literally anything else
 def syscheck_report():
     form_data = request.form.to_dict(flat=False)
@@ -68,14 +68,14 @@ def syscheck_report():
     console_id = get_console_id(report_txt)
     if console_id == "0":
         return "ERROR: Not a valid sysCheck!", 200
-    console_id_censor = "Console ID: "+console_id[:-4]+"***"
+    console_id_censor = console_id[:-4]+"***"
     timestamp = int(time.time())
     report_id = id_generator(6, 'AaBbCcDdFfeEgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWXxYyZz1234567890')
 
     if form_data["password"][0] in config["upload_passwords"]:
         try:
             with open(f"{report_dir}/{report_id}.csv", "a+") as report:
-                report.write(report_txt.replace(f"Console ID: {console_id}", "Console ID: {}".format(console_id_censor)))
+                report.write(report_txt.replace(console_id, console_id_censor))
 
             db = sqlite3.connect(db_dir)
             cursor = db.cursor()
@@ -95,36 +95,36 @@ def view_report():
     report_id = request.args.get("id")
     if os.path.isfile(f"{report_dir}/{report_id}.csv"):
         with open(f"{report_dir}/{report_id}.csv", "r") as report:
-            return render_template("view_report.html", report_id=report_id, report_content=html.escape(report.read())), 200
+            return render_template("view_report.html", report_id=report_id, report_content=html.escape(report.read()), svr_ver=config["version"]), 200
     else:
         return "Report does not exist.", 404
 
-@app.route("/syscheck2", methods=["GET"])
+@app.route("/syscheck_dl", methods=["GET"])
 def syscheck():
-    if len("http://syscheck.softwii.de/syscheck_receiver.php") < len(config["replace_str"]):
+    if len("http://syscheck.rc24.xyz/syscheck_receiver.php") < len(config["replace_str"]):
         return "Replacement host has to be exactly 48 characters; Specified URL is too long!", 400
-    elif len("http://syscheck.softwii.de/syscheck_receiver.php") > len(config["replace_str"]):
+    elif len("http://syscheck.rc24.xyz/syscheck_receiver.php") > len(config["replace_str"]):
         return "Replacement host has to be exactly 48 characters; Specified URL is too short!", 400
 
     dol = BytesIO()
     zip = BytesIO()
 
     # hex edit boot.dol
-    dol2 = open(f"{os.getcwd()}/static/syscheck2/boot.dol", "rb")
-    dol.write(dol2.read().replace("http://syscheck.softwii.de/syscheck_receiver.php".encode("utf-8"), config["replace_str"].encode("utf-8")))
+    dol2 = open(f"{os.getcwd()}/static/syscheck/boot.dol", "rb")
+    dol.write(dol2.read().replace("http://syscheck.rc24.xyz/syscheck_receiver.php".encode("utf-8"), config["replace_str"].encode("utf-8")))
     dol.seek(0)
     dol2.close()
 
     zf = zipfile.ZipFile(zip, "w", zipfile.ZIP_DEFLATED, False)
-    zf.writestr("apps/syscheck2/boot.dol", dol.read())
+    zf.writestr("apps/SysCheckME/boot.dol", dol.read())
     dol.close()
-    zf.write(f"{os.getcwd()}/static/syscheck2/icon.png", "apps/syscheck2/icon.png")
-    zf.write(f"{os.getcwd()}/static/syscheck2/meta.xml", "apps/syscheck2/meta.xml")
+    zf.write(f"{os.getcwd()}/static/syscheck/icon.png", "apps/SysCheckME/icon.png")
+    zf.write(f"{os.getcwd()}/static/syscheck/meta.xml", "apps/SysCheckME/meta.xml")
     zf.close()
     zip.seek(0)
 
     # send zipfile
-    return send_file(zip, mimetype="application/zip", as_attachment=True, download_name="syscheck2.1.0.b19v2.zip"), 200
+    return send_file(zip, mimetype="application/zip", as_attachment=True, download_name="SysCheckME.zip"), 200
 
 # handle errors
 @app.errorhandler(400)

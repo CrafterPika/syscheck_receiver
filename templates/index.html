@@ -8,10 +8,10 @@
     </head>
     <body>
             <div class="topnav">
-                <a href="/syscheck2">Download sysCheck2 (Wii Mini)</a>
+                <a href="/syscheck_dl">Download SysCheckME</a>
             </div>
             <center>
-                <h1>Last 15 SysCheck Uploads:</h1>
+                <h1>Latest Uploads:</h1>
                 <div class="content">
                     {{ uploadIndex|safe }}
                 </div>
@@ -21,8 +21,12 @@
                 <br>
                 <p>Enter you're SysCheck report ID here: <input type="text" id="report_id" placeholder="example">  <button type="button" id="submit-btn">Submit</button></p>
                 <br>
+                <hr>
                 <br>
-                SysCheck server written by CrafterPika! <a href='https://github.com/CrafterPika/syscheck_receiver' target='_blank'>Source Code</a>
+                <p>SysCheck server written by CrafterPika! <a href='https://github.com/CrafterPika/syscheck_receiver' target='_blank'>Source Code</a></p>
+                <p>SysCheck by <a href="https://github.com/modmii/SysCheck-ModMii-Edition" target="_blank">XFlak & Co</a></p>
+                <p>syscheck_receiver v{{ svr_ver }}</p>
+                <p>© CrafterPika <script>document.write(new Date().getFullYear());</script></p>
             </center>
             <script src="{{ url_for('static', filename='main.js') }}"></script>
     </body>
