@@ -68,14 +68,23 @@ def syscheck_report():
     console_id = get_console_id(report_txt)
     if console_id == "0":
         return "ERROR: Not a valid sysCheck!", 200
-    console_id_censor = console_id[:-4]+"***"
+    # figure difference between syscheck2 and syscheckhde and newer
+    if report_txt.split("\n")[0].startswith("sysCheck v2.1.0b19"):
+        console_id_censor = console_id[:-4]+"****"
+        old_syscheck = True
+    else:
+        old_syscheck = False
+        console_id = console_id[:-4]
     timestamp = int(time.time())
     report_id = id_generator(6, 'AaBbCcDdFfeEgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWXxYyZz1234567890')
 
     if form_data["password"][0] in config["upload_passwords"]:
         try:
             with open(f"{report_dir}/{report_id}.csv", "a+") as report:
-                report.write(report_txt.replace(console_id, console_id_censor))
+                if old_syscheck:
+                    report.write(report_txt.replace(console_id, console_id_censor))
+                else:
+                    report.write(report_txt)
 
             db = sqlite3.connect(db_dir)
             cursor = db.cursor()
