@@ -1,0 +1,52 @@
+sysCheck v2.1.0b19 by Double_A and R2-D2199, Nano
+...runs on IOS58 (rev 32033).
+
+Region: PAL
+System Menu 4.3E (v4610)
+Priiloader installed
+Drive date: 2012.06.29
+Homebrew Channel 1.1.2 running on IOS58
+HomebrewFilter ist nicht installiert
+Console ID: 23620***
+Boot2 v4
+Found 45 titles.
+Found 34 IOS on this console. 2 of them are stub.
+
+IOS3 (rev 65280): Stub
+IOS4 (rev 65280): Stub
+IOS9 (rev 26891): No Patches
+IOS12 (rev 26383): No Patches
+IOS13 (rev 26889): No Patches
+IOS14 (rev 26889): No Patches
+IOS15 (rev 26889): No Patches
+IOS17 (rev 26889): No Patches
+IOS21 (rev 26896): No Patches
+IOS22 (rev 27151): No Patches
+IOS28 (rev 27664): No Patches
+IOS31 (rev 29465): No Patches
+IOS33 (rev 29465): No Patches
+IOS34 (rev 29465): No Patches
+IOS35 (rev 29465): No Patches
+IOS36 (rev 29465): No Patches
+IOS37 (rev 31520): No Patches
+IOS38 (rev 29981): No Patches
+IOS41 (rev 29464): No Patches
+IOS43 (rev 29464): No Patches
+IOS45 (rev 29464): No Patches
+IOS46 (rev 29464): No Patches
+IOS48 (rev 29981): No Patches
+IOS53 (rev 31520): No Patches
+IOS55 (rev 31520): No Patches
+IOS56 (rev 31519): No Patches
+IOS57 (rev 31776): No Patches
+IOS58 (rev 32033): USB 2.0
+IOS59 (rev 32802): No Patches
+IOS61 (rev 31519): No Patches
+IOS62 (rev 31264): No Patches
+IOS80 (rev 32801): No Patches
+IOS236[36] (rev 65535, Info: rev 29465): Trucha Bug, ES Identify, NAND Access
+IOS249[57] (rev 21001, Info: d2xl-v1beta2): Trucha Bug, NAND Access, USB 2.0
+BC v6
+MIOS v10
+
+Report generated on 2024/10/13.
