@@ -17,8 +17,9 @@ from io import BytesIO
 with open(f"{os.getcwd()}/config.json", "r") as f:
     config = json.load(f)
 
-parser = ArgumentParser()
-parser.add_argument("-d", "--debug", dest="debug")
+parser = ArgumentParser(prog="syscheck_receiver", description="Server that saves SysCheck report uploads.")
+parser.add_argument("-d", "--debug", dest="debug", action='store_true', help="Runs with Flask debug server instead of Waitress. DO NOT USE IN PRODUCTION!!!!")
+parser.add_argument("-r", "--replace-url", dest="replace_url", help="Allows to replace the default sysCheck url with your own (mostly meant for the pre-provided docker images).")
 args = parser.parse_args()
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
@@ -39,6 +40,11 @@ if config["docker"]:
 else:
     report_dir = f"{os.getcwd()}/reports"
     db_dir = f"{os.getcwd()}/reports.db"
+
+if args.replace_url is None:
+    replace_url = config["replace_str"]
+else:
+    replace_url = args.replace_url
 
 # sever code
 app = Flask('syscheck_receiver')
@@ -111,9 +117,9 @@ def view_report():
 
 @app.route("/syscheck_dl", methods=["GET"])
 def syscheck():
-    if len("http://syscheck.rc24.xyz/syscheck_receiver.php") < len(config["replace_str"]):
+    if len("http://syscheck.rc24.xyz/syscheck_receiver.php") < len(replace_url):
         return "Replacement host has to be exactly 46 characters; Specified URL is too long!", 400
-    elif len("http://syscheck.rc24.xyz/syscheck_receiver.php") > len(config["replace_str"]):
+    elif len("http://syscheck.rc24.xyz/syscheck_receiver.php") > len(replace_url):
         return "Replacement host has to be exactly 46 characters; Specified URL is too short!", 400
 
     dol = BytesIO()
@@ -121,7 +127,7 @@ def syscheck():
 
     # hex edit boot.dol
     dol2 = open(f"{os.getcwd()}/static/syscheck/boot.dol", "rb")
-    dol.write(dol2.read().replace("http://syscheck.rc24.xyz/syscheck_receiver.php".encode("utf-8"), config["replace_str"].encode("utf-8")))
+    dol.write(dol2.read().replace("http://syscheck.rc24.xyz/syscheck_receiver.php".encode("utf-8"), replace_url.encode("utf-8")))
     dol.seek(0)
     dol2.close()
 
@@ -189,7 +195,7 @@ if __name__ == "__main__":
             os.mkdir(report_dir)
 
     # start server
-    if args.debug == "1":
+    if args.debug:
         print("Debug mode: on")
         app.run(host=config["ip"], port=config["port"], debug=True)
     else:
