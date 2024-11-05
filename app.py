@@ -33,6 +33,12 @@ def get_console_id(txt):
 
     return "0"
 
+def return_error(message: string, code: int):
+    jsonstring = {"message": message, "code": code, "error": True}
+    resp = flask.Response(json.dumps(jsonstring))
+    resp.headers["Content-Type"] = "application/json"
+    return resp
+
 # docker
 if config["docker"]:
     report_dir = "/data/reports"
@@ -149,25 +155,13 @@ def syscheck():
 @app.errorhandler(502)
 def errorhandler(e):
     if e.code == 400:
-        jsonstring = {"message": "Bad Request.", "code": 400, "error": True}
-        resp = flask.Response(json.dumps(jsonstring))
-        resp.headers["Content-Type"] = "application/json"
-        return resp, 400
+        return return_error("Bad request", 400), 400
     elif e.code == 404:
-        jsonstring = {"message": "Not found.", "code": 404, "error": True}
-        resp = flask.Response(json.dumps(jsonstring))
-        resp.headers["Content-Type"] = "application/json"
-        return resp, 404
+        return return_error("Not found", 404), 404
     elif e.code == 405:
-        jsonstring = {"message": "Method not allowed.", "code": 405, "error": True}
-        resp = flask.Response(json.dumps(jsonstring))
-        resp.headers["Content-Type"] = "application/json"
-        return resp, 405
+        return return_error("Method not allowed", 405), 405
     elif e.code == 502:
-        jsonstring = {"message": "Bad Gateway.", "code": 502, "error": True}
-        resp = flask.Response(json.dumps(jsonstring))
-        resp.headers["Content-Type"] = "application/json"
-        return resp, 502
+        return return_error("Bad gateway", 502), 502
 
 
 # run server
