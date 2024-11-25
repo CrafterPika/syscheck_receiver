@@ -7,11 +7,9 @@ import random
 import sqlite3
 import time
 import html
-import zipfile
 from argparse import ArgumentParser
 from flask import Flask, request, render_template, send_file
 from datetime import datetime
-from io import BytesIO
 
 # stuff
 with open(f"{os.getcwd()}/config.json", "r") as f:
@@ -19,7 +17,6 @@ with open(f"{os.getcwd()}/config.json", "r") as f:
 
 parser = ArgumentParser(prog="syscheck_receiver", description="Server that saves SysCheck report uploads.")
 parser.add_argument("-d", "--debug", dest="debug", action='store_true', help="Runs with Flask debug server instead of Waitress. DO NOT USE IN PRODUCTION!!!!")
-parser.add_argument("-r", "--replace-url", dest="replace_url", help="Allows to replace the default sysCheck url with your own (mostly meant for the pre-provided docker images).")
 args = parser.parse_args()
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
@@ -47,11 +44,6 @@ else:
     report_dir = f"{os.getcwd()}/reports"
     db_dir = f"{os.getcwd()}/reports.db"
 
-if args.replace_url is None:
-    replace_url = config["replace_str"]
-else:
-    replace_url = args.replace_url
-
 # sever code
 app = Flask('syscheck_receiver')
 
@@ -73,30 +65,28 @@ def index():
     return render_template("index.html", uploadIndex=uploadIndex, report_count=report_count[0][0], svr_ver=config["version"]), 200
 
 @app.route("/syscheck_up.php", methods=["POST"]) # SysCheckME-dev
-@app.route("/syscheck_receiver.php", methods=["POST"]) # literally anything else (DNS?)
+@app.route("/syscheck_u_receiver.php", methods=["POST"]) # literally anything else (DNS?)
 def syscheck_report():
     form_data = request.form.to_dict(flat=False)
     report_txt = form_data["syscheck"][0]
     console_id = get_console_id(report_txt)
+
+    # check if console id: is present
     if console_id == "0":
         return "ERROR: Not a valid sysCheck!", 200
-    # figure difference between syscheck2 and syscheckhde and newer
-    if report_txt.split("\n")[0].startswith("sysCheck v2.1.0b19"):
-        console_id_censor = console_id[:-4]+"****"
-        old_syscheck = True
-    else:
-        old_syscheck = False
-        console_id = console_id[:-4]
+    # check if syscheck isn't too small or too large
+    if len(report_txt.encode("utf-8")) > 6144:
+        return "ERROR: Report is too large! Max is 6KB.", 200
+    elif len(report_txt.encode("utf-8")) < 1330:
+        return "ERROR: Report is too small! Min is 1.3KB.", 200
+
     timestamp = int(time.time())
     report_id = id_generator(6, 'AaBbCcDdFfeEgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWXxYyZz1234567890')
 
-    if form_data["password"][0] in config["upload_passwords"]:
+    if form_data["password"][0] == config["upload_password"]:
         try:
             with open(f"{report_dir}/{report_id}.csv", "a+") as report:
-                if old_syscheck:
-                    report.write(report_txt.replace(console_id, console_id_censor))
-                else:
-                    report.write(report_txt)
+                report.write(report_txt)
 
             db = sqlite3.connect(db_dir)
             cursor = db.cursor()
@@ -108,45 +98,21 @@ def syscheck_report():
         except Exception as ex:
             print(ex)
             return "ERROR: Failed to save SysCheck report!", 200
-        
     else:
         return "ERROR: Unauthorized", 200
 
-@app.route("/view_report", methods=["GET"])
-def view_report():
+@app.route("/download_csv", methods=["GET"], defaults={'_route': 'direct'})
+@app.route("/view_report", methods=["GET"], defaults={'_route': 'template'})
+def view_report(_route):
     report_id = request.args.get("id")
     if os.path.isfile(f"{report_dir}/{report_id}.csv"):
-        with open(f"{report_dir}/{report_id}.csv", "r") as report:
-            return render_template("view_report.html", report_id=report_id, report_content=html.escape(report.read()), svr_ver=config["version"]), 200
+        if _route == "template":
+            with open(f"{report_dir}/{report_id}.csv", "r") as report:
+                return render_template("view_report.html", report_id=report_id, report_content=html.escape(report.read()), svr_ver=config["version"]), 200
+        else:
+            return send_file(f"{report_dir}/{report_id}.csv", as_attachment=True, download_name="report.csv")
     else:
         return "Report does not exist.", 404
-
-@app.route("/syscheck_dl", methods=["GET"])
-def syscheck():
-    if len("http://syscheck.rc24.xyz/syscheck_receiver.php") < len(replace_url):
-        return "Replacement host has to be exactly 46 characters; Specified URL is too long!", 400
-    elif len("http://syscheck.rc24.xyz/syscheck_receiver.php") > len(replace_url):
-        return "Replacement host has to be exactly 46 characters; Specified URL is too short!", 400
-
-    dol = BytesIO()
-    zip = BytesIO()
-
-    # hex edit boot.dol
-    dol2 = open(f"{os.getcwd()}/static/syscheck/boot.dol", "rb")
-    dol.write(dol2.read().replace("http://syscheck.rc24.xyz/syscheck_receiver.php".encode("utf-8"), replace_url.encode("utf-8")))
-    dol.seek(0)
-    dol2.close()
-
-    zf = zipfile.ZipFile(zip, "w", zipfile.ZIP_DEFLATED, False)
-    zf.writestr("apps/SysCheckME/boot.dol", dol.read())
-    dol.close()
-    zf.write(f"{os.getcwd()}/static/syscheck/icon.png", "apps/SysCheckME/icon.png")
-    zf.write(f"{os.getcwd()}/static/syscheck/meta.xml", "apps/SysCheckME/meta.xml")
-    zf.close()
-    zip.seek(0)
-
-    # send zipfile
-    return send_file(zip, mimetype="application/zip", as_attachment=True, download_name="SysCheckME.zip"), 200
 
 # handle errors
 @app.errorhandler(400)
