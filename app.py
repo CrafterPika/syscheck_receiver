@@ -69,7 +69,7 @@ def index():
 def syscheck_report():
     form_data = request.form.to_dict(flat=False)
     report_txt = form_data["syscheck"][0]
-    console_id = get_console_id(report_txt)
+    console_id = get_console_id(report_txt)[:-4]
 
     # check if console id: is present
     if console_id == "0":
