@@ -36,6 +36,11 @@ def return_error(message: string, code: int):
     resp.headers["Content-Type"] = "application/json"
     return resp
 
+def no_cf_chunking(txt):
+    resp = flask.Response(txt)
+    resp.headers["X-Content-Length"] = len(txt.encode("utf-8")) # Cloudflares Proxy strips "Content-Length" when chunking, so we just re-add it manually.
+    return resp
+
 # docker
 if config["docker"]:
     report_dir = "/data/reports"
@@ -64,8 +69,7 @@ def index():
 
     return render_template("index.html", uploadIndex=uploadIndex, report_count=report_count[0][0], svr_ver=config["version"]), 200
 
-@app.route("/syscheck_up.php", methods=["POST"]) # SysCheckME-dev
-@app.route("/syscheck_receiver.php", methods=["POST"]) # literally anything else (DNS?)
+@app.route("/syscheck_receiver.php", methods=["POST"])
 def syscheck_report():
     form_data = request.form.to_dict(flat=False)
     report_txt = form_data["syscheck"][0]
@@ -73,12 +77,12 @@ def syscheck_report():
 
     # check if console id: is present
     if console_id == "0":
-        return "ERROR: Not a valid sysCheck!", 200
+        return no_cf_chunking("ERROR: Not a valid sysCheck!"), 200
     # check if syscheck isn't too small or too large
     if len(report_txt.encode("utf-8")) > 6144:
-        return "ERROR: Report is too large! Max is 6KB.", 200
+        return no_cf_chunking("ERROR: Report is too large! Max is 6KB."), 200
     elif len(report_txt.encode("utf-8")) < 1330:
-        return "ERROR: Report is too small! Min is 1.3KB.", 200
+        return no_cf_chunking("ERROR: Report is too small! Min is 1.3KB."), 200
 
     timestamp = int(time.time())
     report_id = id_generator(6, 'AaBbCcDdFfeEgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWXxYyZz1234567890')
@@ -94,12 +98,12 @@ def syscheck_report():
             db.commit()
             db.close()
 
-            return f"Success! Report ID: {report_id}", 200
+            return no_cf_chunking(f"Success! Report ID: {report_id}"), 200
         except Exception as ex:
             print(ex)
-            return "ERROR: Failed to save SysCheck report!", 200
+            return no_cf_chunking("ERROR: Failed to save SysCheck report!"), 200
     else:
-        return "ERROR: Unauthorized", 200
+        return no_cf_chunking("ERROR: Unauthorized"), 200
 
 @app.route("/download_csv", methods=["GET"], defaults={'_route': 'direct'})
 @app.route("/view_report", methods=["GET"], defaults={'_route': 'template'})
